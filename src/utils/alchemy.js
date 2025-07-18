@@ -1,4 +1,6 @@
 import { Alchemy, Network } from 'alchemy-sdk';
+import dotenv from 'dotenv';
+dotenv.config();
 
 export const getAlchemyInstance = (network) => {
   const settings = {

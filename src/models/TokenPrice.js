@@ -1,12 +1,32 @@
 import mongoose from 'mongoose';
 
-const tokenPriceSchema = new mongoose.Schema({
-  token: { type: String, required: true },
-  network: { type: String, required: true },
-  timestamp: { type: Number, required: true },
-  price: { type: Number, required: true }
+const TokenPriceSchema = new mongoose.Schema({
+  token: {
+    type: String,
+    required: true,
+    lowercase: true,
+  },
+  network: {
+    type: String,
+    required: true,
+    enum: ['ethereum', 'polygon'],
+    lowercase: true,
+  },
+  timestamp: {
+    type: Number,
+    required: true,
+  },
+  price: {
+    type: Number,
+    required: true,
+  },
+}, {
+  timestamps: true, // for createdAt and updatedAt fields
 });
 
-tokenPriceSchema.index({ token: 1, network: 1, timestamp: 1 }, { unique: true });
+// Create an index to speed up queries by token, network, and timestamp
+TokenPriceSchema.index({ token: 1, network: 1, timestamp: 1 }, { unique: true });
 
-export const TokenPrice = mongoose.model('TokenPrice', tokenPriceSchema);
+const TokenPrice = mongoose.model('TokenPrice', TokenPriceSchema);
+
+export default TokenPrice;
