@@ -29,16 +29,24 @@ export const processPriceJob = async (job) => {
     throw new Error('timestamp is required in job data');
   }
 
-  const existing = await TokenPrice.findOne({ token, timestamp });
-  if (existing) {
-    console.log(`📦 Price already exists for ${token} at ${timestamp}, skipping...`);
-    return;
+  // 💡 Skip saving for mock/test tokens
+  const TEST_TOKENS = [
+    "0x000000000000000000000000000000000000dead",
+    "0x0000000000000000000000000000000000000000"
+  ];
+
+  const isTestToken = TEST_TOKENS.includes(token.toLowerCase());
+
+  if (!isTestToken) {
+    const existing = await TokenPrice.findOne({ token, timestamp });
+    if (existing) {
+      console.log(`📦 Price already exists for ${token} at ${timestamp}, skipping...`);
+      return;
+    }
   }
 
-  // Try to fetch price from Alchemy (replace with actual logic)
   let priceData = await getPriceFromAlchemy(token, network, timestamp);
 
-  // If real price is not available (e.g. null), interpolate
   if (!priceData?.price) {
     console.log(`📉 No price found from Alchemy for ${timestamp}, attempting interpolation...`);
 
@@ -55,13 +63,22 @@ export const processPriceJob = async (job) => {
     }
   }
 
-  // Save the price (real or interpolated)
-  const saved = await TokenPrice.create({
-    token,
-    network,
-    timestamp,
-    price: priceData.price,
-  });
+  // ✅ Skip DB save for test tokens
+  if (isTestToken) {
+    console.log(`🧪 Test token detected: Skipping DB save for ${token}`);
+    return;
+  }
+
+const saved = await TokenPrice.findOneAndUpdate(
+  { token, timestamp },
+  {
+    $set: {
+      network,
+      price: priceData.price,
+    },
+  },
+  { upsert: true, new: true }
+);
 
   console.log(`✅ Stored price: ${saved.price} for ${token} at ${timestamp}`);
 };

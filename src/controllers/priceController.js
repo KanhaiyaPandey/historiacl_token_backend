@@ -12,7 +12,6 @@ export const getTokenPrice = async (req, res) => {
     const network = req.body.network;
     const timestamp = Number(req.body.timestamp);
 
-    console.log('🔍 Timestamp type:', typeof timestamp, 'value:', timestamp);
 
     if (!token || !network || isNaN(timestamp)) {
   return res.status(400).json({ error: 'Invalid input data' });
