@@ -113,7 +113,9 @@ export const scheduleFullHistory = async (req, res) => {
     );
 
     return res.json({
-      message: `Scheduled ${jobs.length} daily price jobs from ${dayjs(creationTimestamp * 1000).format()} to ${dayjs(now * 1000).format()}`,
+      message: `✅ Scheduled ${jobs.length} daily price jobs from ${dayjs(creationTimestamp * 1000).format()} to ${dayjs(now * 1000).format()}`,
+      total: jobs.length,
+      jobs, // Include full job details
     });
   } catch (err) {
     console.error('❌ Error scheduling full history:', err);
